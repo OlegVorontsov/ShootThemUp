@@ -11,6 +11,7 @@ class UCameraComponent;
 class USpringArmComponent;
 class USTUHealthComponent;
 class UTextRenderComponent;
+class USTUWeaponComponent;;
 
 UCLASS()
 class SHOOTTHEMUP_API ASTUBaseCharacter : public ACharacter
@@ -38,6 +39,10 @@ protected:
     //объ€вл€ем компонент показывающий плавающий текст здоровь€ персонажа
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UTextRenderComponent* HealthTextComponent;
+
+    //объ€вл€ем компонент дл€ оружи€
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+    USTUWeaponComponent* WeaponComponent;
 
     //объ€вл€ем компонент дл€ анимации смерти персонажа
     UPROPERTY(EditDefaultsOnly, Category = "Animation")

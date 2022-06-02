@@ -7,6 +7,7 @@
 #include "Components/STUCharacterMovementComponent.h"
 #include "Components/STUHealthComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "Components/STUWeaponComponent.h"
 #include "GameFramework/Controller.h"
 
 //создаем собственную категорию логирования
@@ -25,6 +26,8 @@ ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjInit)
     SpringArm->SetupAttachment(GetRootComponent());
     //разрешаем контроль над вращением персонажа
     SpringArm->bUsePawnControlRotation = true;
+    //отодвигаем камеру немного в сторону чтобы было удобнее целиться
+    SpringArm->SocketOffset = FVector(0.0f, 100.0f, 80.0f);
 
     //создаем камеру
     CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
@@ -38,6 +41,11 @@ ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjInit)
     HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("HealthTextComponent"));
     //аттачим компонент к root
     HealthTextComponent->SetupAttachment(GetRootComponent());
+    //делаем не видимым компонент у персонажа которым управляем
+    HealthTextComponent->SetOwnerNoSee(true);
+
+    //создаем компонент для оружия
+    WeaponComponent = CreateDefaultSubobject<USTUWeaponComponent>(TEXT("WeaponComponent"));
 }
 
 void ASTUBaseCharacter::BeginPlay()
@@ -61,6 +69,11 @@ void ASTUBaseCharacter::BeginPlay()
     LandedDelegate.AddDynamic(this, &ASTUBaseCharacter::OnGroundLanded);
 }
 
+void ASTUBaseCharacter::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+}
+
 //функция смерти персонажа
 void ASTUBaseCharacter::OnDeath()
 {
@@ -81,7 +94,7 @@ void ASTUBaseCharacter::OnDeath()
     }
 }
 
-//функция изменения жизней персонажа
+//функция изменения здоровья персонажа
 void ASTUBaseCharacter::OnHealthChanged(float Health)
 {
     //передаем в HealthTextComponent значение из локальтной переменной с указанной точностью
@@ -107,16 +120,12 @@ void ASTUBaseCharacter::OnGroundLanded(const FHitResult& Hit)
     TakeDamage(FinalDamage, FDamageEvent{}, nullptr, nullptr);
 }
 
-void ASTUBaseCharacter::Tick(float DeltaTime)
-{
-    Super::Tick(DeltaTime);
-}
-
 //инпут персонажа
 void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
     check(PlayerInputComponent);
+    check(WeaponComponent);
 
     //вызов функций движения персонажа вперед назад вправо влево
     PlayerInputComponent->BindAxis("MoveForward", this, &ASTUBaseCharacter::MoveForward);
@@ -132,6 +141,9 @@ void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
     //вызов функций бега персонажа
     PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ASTUBaseCharacter::OnStartRunning);
     PlayerInputComponent->BindAction("Run", IE_Released, this, &ASTUBaseCharacter::OnStopRunning);
+
+    //вызов функции стрельбы
+    PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &USTUWeaponComponent::Fire);
 }
 
 //функция движения персонажа вперед назад
@@ -153,7 +165,7 @@ void ASTUBaseCharacter::MoveRight(float Amount)
     AddMovementInput(GetActorRightVector(), Amount);
 }
 
-//функция бега персонажа
+//функции бега персонажа
 void ASTUBaseCharacter::OnStartRunning()
 {
     WantsToRun = true;
