@@ -26,5 +26,31 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     USkeletalMeshComponent* WeaponMesh;
 
+    //объевялем переменную для имени сокета который создали в оружии
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    FName MuzzleSocketName = "MuzzleSocket";
+
+    //объявляем переменную max дистанции для выстрела
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    float TraceMaxDistance = 1500.0f;
+
     virtual void BeginPlay() override;
+
+    //функция выстрела для имитации выпущения одной пули
+    void MakeShot();
+
+    //функция получения нашего персонажа
+    APlayerController* GetPlayerController() const;
+
+    //функция получения доступа к камере персонажа
+    bool GetPlayerViewPoint(FVector& ViewLocation, FRotator& ViewRotation) const;
+
+    //функция получения расположения сокета в оружии
+    FVector GetMuzzleWorldLocation() const;
+
+    //функция получения начальной и конечной точки стрельбы
+    bool GetTraceData(FVector& TraceStart, FVector& TraceEnd) const;
+
+    //функция выстрела
+    void MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd);
 };
