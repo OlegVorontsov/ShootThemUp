@@ -25,51 +25,10 @@ void ASTUBaseWeapon::BeginPlay()
     check(WeaponMesh);
 }
 
-//функция стрельбы
-void ASTUBaseWeapon::Fire()
-{
-    // UE_LOG(LogBaseWeapon, Display, TEXT("Fire!"));
-
-    //вызов функции выстрела
-    MakeShot();
-}
-
-void ASTUBaseWeapon::MakeShot()
-{
-    if (!GetWorld())
-        return;
-
-    //создаем переменные для начальной/конечной точек выстрела
-    FVector TraceStart, TraceEnd;
-
-    //вызываем функцию получения начальной и конечной точки стрельбы
-    if (!GetTraceData(TraceStart, TraceEnd))
-        return;
-
-    //переменная с результатами столкновения
-    FHitResult HitResult;
-
-    //вызываем функцию выстрела
-    MakeHit(HitResult, TraceStart, TraceEnd);
-
-    //проверяем если пересечение произошло
-    if (HitResult.bBlockingHit)
-    {
-        //рисуем линию выстрела от места расположения сокета в оружии до точки где произошло пересечение
-        DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), HitResult.ImpactPoint, FColor::Red, false, 3.0f, 0, 3.0f);
-
-        //нарисуем сферу в точке пересечения
-        DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 24, FColor::Red, false, 5.0f);
-
-        //выводим в консоль название кости с которой пересеклись
-        // UE_LOG(LogBaseWeapon, Display, TEXT("Bone: %s"), *HitResult.BoneName.ToString());
-    }
-    else
-    {
-        //рисуем линию выстрела от места расположения сокета в оружии на расстояние TraceMaxDistance
-        DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), TraceEnd, FColor::Red, false, 3.0f, 0, 3.0f);
-    }
-}
+//виртуальные функции стрельбы
+void ASTUBaseWeapon::StartFire() {}
+void ASTUBaseWeapon::StopFire() {}
+void ASTUBaseWeapon::MakeShot() {}
 
 //функция получения нашего персонажа
 APlayerController* ASTUBaseWeapon::GetPlayerController() const
@@ -141,4 +100,16 @@ void ASTUBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, c
     //вызываем функцию пересечения с первым попавшимся объектом на сцене
     GetWorld()->LineTraceSingleByChannel(
         HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionParams);
+}
+
+//функция нанесения ущерба
+void ASTUBaseWeapon::MakeDamage(FHitResult& HitResult)
+{
+    //получаем актора в которого попали и записываем в переменную
+    const auto DamagedActor = HitResult.GetActor();
+
+    //наносим урон если у казатель не нулевой. FDamageEvent() - конструктор по умолчанию
+    if (!DamagedActor)
+        return;
+    DamagedActor->TakeDamage(DamageAmount, FDamageEvent(), GetPlayerController(), this);
 }

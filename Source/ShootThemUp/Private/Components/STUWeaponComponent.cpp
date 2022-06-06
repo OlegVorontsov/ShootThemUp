@@ -47,12 +47,20 @@ void USTUWeaponComponent::SpawnWeapon()
     CurrentWeapon->SetOwner(Character);
 }
 
-//функци€ определ€юща€ входную точку дл€ стрельбы
-void USTUWeaponComponent::Fire()
+//функции стрельбы
+void USTUWeaponComponent::StartFire()
 {
     if (!CurrentWeapon)
         return;
 
-    //вызываем функцию Fire в STUBaseWeapon
-    CurrentWeapon->Fire();
+    //вызываем функцию StartFire в STUBaseWeapon
+    CurrentWeapon->StartFire();
+}
+void USTUWeaponComponent::StopFire()
+{
+    if (!CurrentWeapon)
+        return;
+
+    //вызываем функцию StopFire в STUBaseWeapon
+    CurrentWeapon->StopFire();
 }

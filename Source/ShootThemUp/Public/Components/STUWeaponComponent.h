@@ -17,8 +17,9 @@ class SHOOTTHEMUP_API USTUWeaponComponent : public UActorComponent
 public:
     USTUWeaponComponent();
 
-    //функци€ определ€юща€ входную точку дл€ стрельбы
-    void Fire();
+    //функции стрельбы
+    void StartFire();
+    void StopFire();
 
 protected:
     //объ€вл€ем класс дл€ спавна оружи€

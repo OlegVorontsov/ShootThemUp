@@ -17,9 +17,10 @@ class SHOOTTHEMUP_API ASTUBaseWeapon : public AActor
 public:
     ASTUBaseWeapon();
 
-    //объ€вл€ем функцию стрельбы с возможностью переопределени€ virtual
-    //так как разное оружие будет стрел€ть поразному
-    virtual void Fire();
+    //объ€вл€ем функции стрельбы с возможностью переопределени€ virtual
+    //так как разное оружие будет стрел€ть по-разному
+    virtual void StartFire();
+    virtual void StopFire();
 
 protected:
     //объ€вл€ем скелетал меш дл€ оружи€
@@ -34,10 +35,17 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     float TraceMaxDistance = 1500.0f;
 
+    //переменна€ размера ущерба
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float DamageAmount = 10.0f;
+
     virtual void BeginPlay() override;
 
-    //функци€ выстрела дл€ имитации выпущени€ одной пули
-    void MakeShot();
+    //виртуальна€ функци€ выстрела дл€ имитации выпущени€ одной пули
+    virtual void MakeShot();
+
+    //виртуальна€ функци€ получени€ начальной и конечной точки стрельбы
+    virtual bool GetTraceData(FVector& TraceStart, FVector& TraceEnd) const;
 
     //функци€ получени€ нашего персонажа
     APlayerController* GetPlayerController() const;
@@ -48,9 +56,9 @@ protected:
     //функци€ получени€ расположени€ сокета в оружии
     FVector GetMuzzleWorldLocation() const;
 
-    //функци€ получени€ начальной и конечной точки стрельбы
-    bool GetTraceData(FVector& TraceStart, FVector& TraceEnd) const;
-
     //функци€ выстрела
     void MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd);
+
+    //функци€ нанесени€ ущерба
+    void MakeDamage(FHitResult& HitResult);
 };
