@@ -28,16 +28,12 @@ protected:
     USkeletalMeshComponent* WeaponMesh;
 
     //объев€лем переменную дл€ имени сокета который создали в оружии
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     FName MuzzleSocketName = "MuzzleSocket";
 
     //объ€вл€ем переменную max дистанции дл€ выстрела
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     float TraceMaxDistance = 1500.0f;
-
-    //переменна€ размера ущерба
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    float DamageAmount = 10.0f;
 
     virtual void BeginPlay() override;
 
@@ -58,7 +54,4 @@ protected:
 
     //функци€ выстрела
     void MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd);
-
-    //функци€ нанесени€ ущерба
-    void MakeDamage(FHitResult& HitResult);
 };

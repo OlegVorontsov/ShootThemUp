@@ -18,12 +18,16 @@ public:
 
 protected:
     //переменна€ времени между выстрелами
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     float TimeBetweenShots = 0.1f;
 
     //переменна€ половины ширину конуса разброса при стрельбе
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     float BulletSpread = 1.5f;
+
+    //переменна€ размера ущерба
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    float DamageAmount = 10.0f;
 
     //переопредел€ем функцию выстрела дл€ имитации выпущени€ одной пули
     virtual void MakeShot() override;
@@ -34,4 +38,7 @@ protected:
 private:
     //объ€вл€ем таймер
     FTimerHandle ShotTimerHandle;
+
+    //функци€ нанесени€ ущерба
+    void MakeDamage(FHitResult& HitResult);
 };

@@ -101,15 +101,3 @@ void ASTUBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, c
     GetWorld()->LineTraceSingleByChannel(
         HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionParams);
 }
-
-//функция нанесения ущерба
-void ASTUBaseWeapon::MakeDamage(FHitResult& HitResult)
-{
-    //получаем актора в которого попали и записываем в переменную
-    const auto DamagedActor = HitResult.GetActor();
-
-    //наносим урон если у казатель не нулевой. FDamageEvent() - конструктор по умолчанию
-    if (!DamagedActor)
-        return;
-    DamagedActor->TakeDamage(DamageAmount, FDamageEvent(), GetPlayerController(), this);
-}

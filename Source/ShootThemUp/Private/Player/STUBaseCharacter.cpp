@@ -96,6 +96,9 @@ void ASTUBaseCharacter::OnDeath()
 
     //отключаем реакцию на коллизии у CapsuleCollision умершего персонажа
     GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+    //останавливаем стрельбу
+    WeaponComponent->StopFire();
 }
 
 //функция изменения здоровья персонажа
@@ -149,6 +152,9 @@ void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
     //вызов функций стрельбы
     PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &USTUWeaponComponent::StartFire);
     PlayerInputComponent->BindAction("Fire", IE_Released, WeaponComponent, &USTUWeaponComponent::StopFire);
+
+    //вызов функции смены оружия
+    PlayerInputComponent->BindAction("NextWeapon", IE_Pressed, WeaponComponent, &USTUWeaponComponent::NextWeapon);
 }
 
 //функция движения персонажа вперед назад

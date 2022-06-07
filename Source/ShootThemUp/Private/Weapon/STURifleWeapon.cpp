@@ -86,3 +86,15 @@ bool ASTURifleWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const
 
     return true;
 }
+
+//функция нанесения ущерба
+void ASTURifleWeapon::MakeDamage(FHitResult& HitResult)
+{
+    //получаем актора в которого попали и записываем в переменную
+    const auto DamagedActor = HitResult.GetActor();
+
+    //наносим урон если у казатель не нулевой. FDamageEvent() - конструктор по умолчанию
+    if (!DamagedActor)
+        return;
+    DamagedActor->TakeDamage(DamageAmount, FDamageEvent(), GetPlayerController(), this);
+}
