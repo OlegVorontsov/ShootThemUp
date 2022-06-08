@@ -1,3 +1,3 @@
 // ShootThemUp. Game by Vorontsov Oleg. All rigths reserved
 
-#include "Animations/STUEquipFinishedAnimNotify.h"
+#include "Animations/STUReloadFinishedAnimNotify.h"

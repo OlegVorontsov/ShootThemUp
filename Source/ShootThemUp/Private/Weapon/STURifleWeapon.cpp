@@ -9,11 +9,11 @@ void ASTURifleWeapon::StartFire()
 {
     // UE_LOG(LogBaseWeapon, Display, TEXT("Fire!"));
 
-    //вызов функции выстрела
-    MakeShot();
-
     //вызываем таймер по истечении которого опять вызовется MakeShot()
     GetWorldTimerManager().SetTimer(ShotTimerHandle, this, &ASTURifleWeapon::MakeShot, TimeBetweenShots, true);
+
+    //вызов функции выстрела
+    MakeShot();
 }
 void ASTURifleWeapon::StopFire()
 {
@@ -23,15 +23,22 @@ void ASTURifleWeapon::StopFire()
 
 void ASTURifleWeapon::MakeShot()
 {
-    if (!GetWorld())
+    //если нет игры и арсенал пуст в BaseWeapon не можем стрелять. останавливаем стрельбу
+    if (!GetWorld() || IsAmmoEmpty())
+    {
+        StopFire();
         return;
+    }
 
     //создаем переменные для начальной/конечной точек выстрела
     FVector TraceStart, TraceEnd;
 
     //вызываем функцию получения начальной и конечной точки стрельбы
     if (!GetTraceData(TraceStart, TraceEnd))
+    {
+        StopFire();
         return;
+    }
 
     //переменная с результатами столкновения
     FHitResult HitResult;
@@ -59,6 +66,8 @@ void ASTURifleWeapon::MakeShot()
         //рисуем линию выстрела от места расположения сокета в оружии на расстояние TraceMaxDistance
         DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), TraceEnd, FColor::Red, false, 3.0f, 0, 3.0f);
     }
+    //уменьшаем количество патрон в BaseWeapon
+    DecreaseAmmo();
 }
 
 //функция получения начальной и конечной точки стрельбы

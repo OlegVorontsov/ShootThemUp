@@ -6,8 +6,30 @@
 #include "GameFramework/Actor.h"
 #include "STUBaseWeapon.generated.h"
 
+//объ€вл€ем делегат оповещающий WeaponComponent что патроны закончились
+DECLARE_MULTICAST_DELEGATE(FOnClipEmptySignature);
+
 //форвард декларэтион
 class USkeletalMeshComponent;
+
+//объ€вл€ем структуру дл€ пуль
+USTRUCT(BlueprintType)
+struct FAmmoData
+{
+    GENERATED_USTRUCT_BODY()
+
+    //переменна€ дл€ количества патрон в магазине
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    int32 Bullets;
+
+    //переменна€ дл€ количества магазинов. параметр meta - только если арсенал конечен
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (EditCondition = "!Infinite"));
+    int32 CLips;
+
+    //переменна€ дл€ определени€ завершени€ арсенала
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    bool Infinite;
+};
 
 UCLASS()
 class SHOOTTHEMUP_API ASTUBaseWeapon : public AActor
@@ -17,10 +39,19 @@ class SHOOTTHEMUP_API ASTUBaseWeapon : public AActor
 public:
     ASTUBaseWeapon();
 
+    //объ€вл€ем делегат оповещающий WeaponComponent что патроны закончились
+    FOnClipEmptySignature OnClipEmpty;
+
     //объ€вл€ем функции стрельбы с возможностью переопределени€ virtual
     //так как разное оружие будет стрел€ть по-разному
     virtual void StartFire();
     virtual void StopFire();
+
+    //функци€ смены магазина
+    void ChangeClip();
+
+    //функци€ определ€ет возможна ли перезар€дка
+    bool CanReload() const;
 
 protected:
     //объ€вл€ем скелетал меш дл€ оружи€
@@ -34,6 +65,10 @@ protected:
     //объ€вл€ем переменную max дистанции дл€ выстрела
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     float TraceMaxDistance = 1500.0f;
+
+    //начальный арсенал оружи€
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    FAmmoData DefaultAmmo{15, 5, false};
 
     virtual void BeginPlay() override;
 
@@ -54,4 +89,20 @@ protected:
 
     //функци€ выстрела
     void MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd);
+
+    //функци€ уменьшающа€ количество патрон при выстреле
+    void DecreaseAmmo();
+
+    //функци€ вернет true когда арсенал пуст
+    bool IsAmmoEmpty() const;
+
+    //функци€ вернет true когда магазин пуст
+    bool IsClipEmpty() const;
+
+    //функци€ выведени€ информации об арсенале
+    void LogAmmo();
+
+private:
+    //текущий арсенал оружи€
+    FAmmoData CurrentAmmo;
 };

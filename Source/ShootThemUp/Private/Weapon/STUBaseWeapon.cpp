@@ -23,6 +23,9 @@ void ASTUBaseWeapon::BeginPlay()
 {
     Super::BeginPlay();
     check(WeaponMesh);
+
+    //задаем текущий арсенал через начальный
+    CurrentAmmo = DefaultAmmo;
 }
 
 //виртуальные функции стрельбы
@@ -100,4 +103,79 @@ void ASTUBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, c
     //вызываем функцию пересечения с первым попавшимся объектом на сцене
     GetWorld()->LineTraceSingleByChannel(
         HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionParams);
+}
+
+//функция уменьшающая количество патрон при выстреле
+void ASTUBaseWeapon::DecreaseAmmo()
+{
+    //проверяем остались ли патроны
+    if (CurrentAmmo.Bullets == 0)
+    {
+        UE_LOG(LogBaseWeapon, Warning, TEXT("Clip is empty!"));
+    }
+    //уменьшаем количество патрон
+    CurrentAmmo.Bullets--;
+    LogAmmo();
+
+    //проверяем нужна ли перезарядка. магазин пуст и арсенал не пустой
+    if (IsClipEmpty() && !IsAmmoEmpty())
+    {
+        //останавливаем стрельбу
+        StopFire();
+
+        //подписываемся на делегат
+        OnClipEmpty.Broadcast();
+    }
+}
+
+//функция вернет true когда арсенал пуст
+bool ASTUBaseWeapon::IsAmmoEmpty() const
+{
+    //если арсенал конечен и магазины 0 и патроны 0
+    return !CurrentAmmo.Infinite && CurrentAmmo.CLips == 0 && IsClipEmpty();
+}
+
+//функция вернет true когда магазин пуст
+bool ASTUBaseWeapon::IsClipEmpty() const
+{
+    return CurrentAmmo.Bullets == 0;
+}
+
+//функция смены магазина
+void ASTUBaseWeapon::ChangeClip()
+{
+    //если арсенал не бесконечен
+    if (!CurrentAmmo.Infinite)
+    {
+        //проверяем остались ли магазины
+        if (CurrentAmmo.CLips == 0)
+        {
+            UE_LOG(LogBaseWeapon, Warning, TEXT("No more clips!"));
+        }
+        //убавляем мазазины
+        CurrentAmmo.CLips--;
+    }
+    //восстанавливаем количество патрон в начальное значение
+    CurrentAmmo.Bullets = DefaultAmmo.Bullets;
+
+    UE_LOG(LogBaseWeapon, Display, TEXT("----------Change Clip-----------"));
+}
+
+//функция определяет возможна ли перезарядка
+bool ASTUBaseWeapon::CanReload() const
+{
+    //вернет true если не осталось патрон и если есть магазины
+    return CurrentAmmo.Bullets < DefaultAmmo.Bullets && CurrentAmmo.CLips > 0;
+}
+
+//функция выведения информации об арсенале
+void ASTUBaseWeapon::LogAmmo()
+{
+    //локальная переменная с информацией о патронах
+    FString AmmoInfo = "Ammo: " + FString::FromInt(CurrentAmmo.Bullets) + " / ";
+
+    //добавляем в строку либо кол-во магазинов если арсенал конечен либо текст Infinite если арсенал бесконечен
+    AmmoInfo += CurrentAmmo.Infinite ? "Infinite" : FString::FromInt(CurrentAmmo.CLips);
+
+    UE_LOG(LogBaseWeapon, Display, TEXT("%s"), *AmmoInfo);
 }

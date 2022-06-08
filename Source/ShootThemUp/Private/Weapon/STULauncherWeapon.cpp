@@ -10,7 +10,8 @@ void ASTULauncherWeapon::StartFire()
 }
 void ASTULauncherWeapon::MakeShot()
 {
-    if (!GetWorld())
+    //если нет игры и арсенал пуст в BaseWeapon не можем стрелять
+    if (!GetWorld() || IsAmmoEmpty())
         return;
 
     //создаем переменные для начальной/конечной точек выстрела
@@ -52,4 +53,6 @@ void ASTULauncherWeapon::MakeShot()
 
         Projectile->FinishSpawning(SpawnTransform);
     }
+    //уменьшаем количество патрон в BaseWeapon
+    DecreaseAmmo();
 }

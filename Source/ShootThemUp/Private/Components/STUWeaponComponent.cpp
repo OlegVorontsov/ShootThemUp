@@ -4,6 +4,7 @@
 #include "Weapon/STUBaseWeapon.h"
 #include "GameFramework/Character.h"
 #include "Animations/STUEquipFinishedAnimNotify.h"
+#include "Animations/STUReloadFinishedAnimNotify.h"
 
 //создаем собственную категорию логирования
 DEFINE_LOG_CATEGORY_STATIC(WeaponComponentLog, All, All);
@@ -60,12 +61,15 @@ void USTUWeaponComponent::SpawnWeapons()
         return;
 
     //спавним оружие
-    for (auto WeaponClass : WeaponClasses)
+    for (auto OneWeaponData : WeaponData)
     {
         //спавним оружие созданного класса и записываем в переменную
-        auto Weapon = GetWorld()->SpawnActor<ASTUBaseWeapon>(WeaponClass);
+        auto Weapon = GetWorld()->SpawnActor<ASTUBaseWeapon>(OneWeaponData.WeaponClass);
         if (!Weapon)
             continue;
+
+        //подписываемся на делегат
+        Weapon->OnClipEmpty.AddUObject(this, &USTUWeaponComponent::OnEmptyClip);
 
         //для каждого заспавненого оружия назначаем ownera - нашего персонажа
         Weapon->SetOwner(Character);
@@ -95,6 +99,13 @@ void USTUWeaponComponent::AttachWeaponToSocket(
 //функция определяющая текущее оружие и приаттачивание его к руке персонажа
 void USTUWeaponComponent::EquipWeapon(int32 WeaponIndex)
 {
+    //проверяем WeaponIndex
+    if (WeaponIndex < 0 || WeaponIndex >= Weapons.Num())
+    {
+        UE_LOG(WeaponComponentLog, Warning, TEXT("Invalid weapon index!"));
+        return;
+    }
+
     //создаем переменную куда записываем владельца этого компонента
     ACharacter* Character = Cast<ACharacter>(GetOwner());
 
@@ -113,13 +124,22 @@ void USTUWeaponComponent::EquipWeapon(int32 WeaponIndex)
     //меняем указатель на другое оружие
     CurrentWeapon = Weapons[WeaponIndex];
 
+    //получаем указатель на структуру текущего оружия
+    const auto CurrentWeaponData = WeaponData.FindByPredicate([&](const FWeaponData& Data) { //
+        return Data.WeaponClass == CurrentWeapon->GetClass();                                //
+    });
+
+    //проверяем не нулевой ли указатель CurrentWeaponData. если не нулевой устанавливаем анимацию
+    //нулевой - делаем указатель nullptr
+    CurrentReloadAnimMontage = CurrentWeaponData ? CurrentWeaponData->ReloadAnimMontage : nullptr;
+
     //аттачим оружие к руке персонажа
     AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponEquipSocketName);
 
     //начинаем процесс смены оружия
     EquipAnimInProgress = true;
 
-    //вызываем функция воспроизведения анимации
+    //вызываем функцию воспроизведения анимации смены оружия
     PlayAnimMontage(EquipAnimMontage);
 }
 
@@ -151,24 +171,26 @@ void USTUWeaponComponent::PlayAnimMontage(UAnimMontage* Animation)
 //функция для подписания на AnimNotify
 void USTUWeaponComponent::InitAnimations()
 {
-    if (!EquipAnimMontage)
-        return;
+    // c помощью шаблонной функции ищем нужный notify и записываем в переменную
+    auto EquipFinishedNotify = FindNotifyByClass<USTUEquipFinishedAnimNotify>(EquipAnimMontage);
 
-    //создаем массив эвентов
-    const auto NotifyEvents = EquipAnimMontage->Notifies;
-
-    //перебираем массив
-    for (auto NotifyEvent : NotifyEvents)
+    //если нашли нужный notify биндим функцию через делегат
+    if (EquipFinishedNotify)
     {
-        //находим нужный notify и записываем в переменную
-        auto EquipFinishedNotify = Cast<USTUEquipFinishedAnimNotify>(NotifyEvent.Notify);
+        EquipFinishedNotify->OnNotified.AddUObject(this, &USTUWeaponComponent::OnEquipFinished);
+    }
 
-        //если нашли нужный notify биндим функцию через делегат
-        if (EquipFinishedNotify)
-        {
-            EquipFinishedNotify->OnNotified.AddUObject(this, &USTUWeaponComponent::OnEquipFinished);
-            break;
-        }
+    //проходимся по массиву WeaponData
+    for (auto OneWeaponData : WeaponData)
+    {
+        // c помощью шаблонной функции ищем нужный notify и записываем в переменную
+        auto ReloadFinishedNotify = FindNotifyByClass<USTUReloadFinishedAnimNotify>(OneWeaponData.ReloadAnimMontage);
+
+        //если не нашли нужный notify продолжим искать. нашли биндим функцию через делегат
+        if (!ReloadFinishedNotify)
+            continue;
+
+        ReloadFinishedNotify->OnNotified.AddUObject(this, &USTUWeaponComponent::OnReloadFinished);
     }
 }
 
@@ -182,19 +204,41 @@ void USTUWeaponComponent::OnEquipFinished(USkeletalMeshComponent* MeshComponent)
     if (!Character || MeshComponent != Character->GetMesh())
         return;
 
-    //заканчиваем процесс смены оружия
+    //заканчиваем процесс анимации смены оружия
     EquipAnimInProgress = false;
 }
 
-//функции позволяющие стрелять/менять оружие
+//функция биндинга на делегат
+void USTUWeaponComponent::OnReloadFinished(USkeletalMeshComponent* MeshComponent)
+{
+    //создаем переменную куда записываем владельца этого компонента
+    ACharacter* Character = Cast<ACharacter>(GetOwner());
+
+    //только для нашего персонажа
+    if (!Character || MeshComponent != Character->GetMesh())
+        return;
+
+    //заканчиваем процесс анимации смены оружия
+    ReloadAnimInProgress = false;
+}
+
+//функции позволяющие стрелять/менять/перезаряжать оружие
 bool USTUWeaponComponent::CanFire() const
 {
-    //проверяем есть ли оружие и не идет ли смена оружия
-    return CurrentWeapon && !EquipAnimInProgress;
+    //проверяем есть ли оружие и не идет ли смена оружия и не идет ли перезарядка
+    return CurrentWeapon && !EquipAnimInProgress && !ReloadAnimInProgress;
 }
 bool USTUWeaponComponent::CanEquip() const
 {
-    return !EquipAnimInProgress;
+    return !EquipAnimInProgress && !ReloadAnimInProgress;
+}
+bool USTUWeaponComponent::CanReload() const
+{
+    //проверяем есть ли оружие и не идет ли смена оружия и не идет ли перезарядка и может ли оружие перезаряжаться
+    return CurrentWeapon            //
+           && !EquipAnimInProgress  //
+           && !ReloadAnimInProgress //
+           && CurrentWeapon->CanReload();
 }
 
 //функции стрельбы
@@ -214,4 +258,32 @@ void USTUWeaponComponent::StopFire()
 
     //вызываем функцию StopFire в STUBaseWeapon
     CurrentWeapon->StopFire();
+}
+
+//функция перезарядки по нажатой клавише игрока
+void USTUWeaponComponent::Reload()
+{
+    ChangeClip();
+}
+
+//функция бинда на делегат OnClipEmpty - закончились пастроны в BaseWeapon
+void USTUWeaponComponent::OnEmptyClip()
+{
+    ChangeClip();
+}
+
+//функция перезарядки оружия
+void USTUWeaponComponent::ChangeClip()
+{
+    //проверяем если не можем перезаряжаться выходим из функции
+    if (!CanReload())
+        return;
+    //останавливаем стрельбу
+    CurrentWeapon->StopFire();
+
+    //заменяем магазин
+    CurrentWeapon->ChangeClip();
+
+    ReloadAnimInProgress = true;
+    PlayAnimMontage(CurrentReloadAnimMontage);
 }
