@@ -4,13 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+
+#include "STUCoreTypes.h"
+
 #include "STUHealthComponent.generated.h"
-
-//делегат оповещающий персонажа о том умер он или нет
-DECLARE_MULTICAST_DELEGATE(FOnDeathSignature);
-
-//делегат вызывается когда меняются жизни персонажа
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SHOOTTHEMUP_API USTUHealthComponent : public UActorComponent

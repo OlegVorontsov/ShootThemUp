@@ -23,6 +23,8 @@ void ASTUBaseWeapon::BeginPlay()
 {
     Super::BeginPlay();
     check(WeaponMesh);
+    checkf(DefaultAmmo.Bullets > 0, TEXT("Bullets count couldn't be less or equal zero!"));
+    checkf(DefaultAmmo.CLips > 0, TEXT("CLips count couldn't be less or equal zero!"));
 
     //задаем текущий арсенал через начальный
     CurrentAmmo = DefaultAmmo;

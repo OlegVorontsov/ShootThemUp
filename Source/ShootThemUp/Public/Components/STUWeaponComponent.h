@@ -4,25 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+
+#include "STUCoreTypes.h"
+
 #include "STUWeaponComponent.generated.h"
 
 // forward declaration
 class ASTUBaseWeapon;
-
-//структура хран€ща€ информацию об оружии и анимации перезар€дки к нему
-USTRUCT(BlueprintType)
-struct FWeaponData
-{
-    GENERATED_USTRUCT_BODY()
-
-    //объ€вл€ем класс оружи€
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-    TSubclassOf<ASTUBaseWeapon> WeaponClass;
-
-    //анимаци€ перезар€дки
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-    UAnimMontage* ReloadAnimMontage;
-};
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SHOOTTHEMUP_API USTUWeaponComponent : public UActorComponent
@@ -117,28 +105,4 @@ private:
 
     //функци€ перезар€дки оружи€
     void ChangeClip();
-
-    //шаблонна€ функци€ поиска notify
-    template <typename T> T* FindNotifyByClass(UAnimSequenceBase* Animation)
-    {
-        if (!Animation)
-            return nullptr;
-
-        //создаем массив эвентов
-        const auto NotifyEvents = Animation->Notifies;
-
-        //перебираем массив
-        for (auto NotifyEvent : NotifyEvents)
-        {
-            //находим нужный notify и записываем в переменную
-            auto AnimNotify = Cast<T>(NotifyEvent.Notify);
-
-            //если нашли нужный notify биндим функцию через делегат
-            if (AnimNotify)
-            {
-                return AnimNotify;
-            }
-        }
-        return nullptr;
-    }
 };

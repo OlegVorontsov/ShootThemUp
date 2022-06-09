@@ -4,32 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "STUBaseWeapon.generated.h"
 
-//объявляем делегат оповещающий WeaponComponent что патроны закончились
-DECLARE_MULTICAST_DELEGATE(FOnClipEmptySignature);
+#include "STUCoreTypes.h"
+
+#include "STUBaseWeapon.generated.h"
 
 //форвард декларэтион
 class USkeletalMeshComponent;
-
-//объявляем структуру для пуль
-USTRUCT(BlueprintType)
-struct FAmmoData
-{
-    GENERATED_USTRUCT_BODY()
-
-    //переменная для количества патрон в магазине
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-    int32 Bullets;
-
-    //переменная для количества магазинов. параметр meta - только если арсенал конечен
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (EditCondition = "!Infinite"));
-    int32 CLips;
-
-    //переменная для определения завершения арсенала
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-    bool Infinite;
-};
 
 UCLASS()
 class SHOOTTHEMUP_API ASTUBaseWeapon : public AActor

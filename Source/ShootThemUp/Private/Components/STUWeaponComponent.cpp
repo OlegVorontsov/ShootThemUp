@@ -5,9 +5,13 @@
 #include "GameFramework/Character.h"
 #include "Animations/STUEquipFinishedAnimNotify.h"
 #include "Animations/STUReloadFinishedAnimNotify.h"
+#include "Animations/AnimUtils.h"
 
 //создаем собственную категорию логирования
 DEFINE_LOG_CATEGORY_STATIC(WeaponComponentLog, All, All);
+
+//ограничитель кол-ва единиц оружия
+constexpr static int32 WeaponNum = 2;
 
 USTUWeaponComponent::USTUWeaponComponent()
 {
@@ -18,10 +22,12 @@ void USTUWeaponComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    CurrentWeaponIndex = 0;
+    checkf(WeaponData.Num() == WeaponNum, TEXT("This character can hold only %i weapon items!"), WeaponNum);
 
     //функция для подписания на AnimNotify
     InitAnimations();
+
+    CurrentWeaponIndex = 0;
 
     //вызываем функцию спавна оружия
     SpawnWeapons();
@@ -172,24 +178,32 @@ void USTUWeaponComponent::PlayAnimMontage(UAnimMontage* Animation)
 void USTUWeaponComponent::InitAnimations()
 {
     // c помощью шаблонной функции ищем нужный notify и записываем в переменную
-    auto EquipFinishedNotify = FindNotifyByClass<USTUEquipFinishedAnimNotify>(EquipAnimMontage);
+    auto EquipFinishedNotify = AnimUtils::FindNotifyByClass<USTUEquipFinishedAnimNotify>(EquipAnimMontage);
 
     //если нашли нужный notify биндим функцию через делегат
     if (EquipFinishedNotify)
     {
         EquipFinishedNotify->OnNotified.AddUObject(this, &USTUWeaponComponent::OnEquipFinished);
     }
+    else
+    {
+        UE_LOG(WeaponComponentLog, Error, TEXT("Equip anim notify is forgotten to set!"));
+        checkNoEntry();
+    }
 
     //проходимся по массиву WeaponData
     for (auto OneWeaponData : WeaponData)
     {
         // c помощью шаблонной функции ищем нужный notify и записываем в переменную
-        auto ReloadFinishedNotify = FindNotifyByClass<USTUReloadFinishedAnimNotify>(OneWeaponData.ReloadAnimMontage);
+        auto ReloadFinishedNotify =
+            AnimUtils::FindNotifyByClass<USTUReloadFinishedAnimNotify>(OneWeaponData.ReloadAnimMontage);
 
         //если не нашли нужный notify продолжим искать. нашли биндим функцию через делегат
         if (!ReloadFinishedNotify)
-            continue;
-
+        {
+            UE_LOG(WeaponComponentLog, Error, TEXT("Reload anim notify is forgotten to set!"));
+            checkNoEntry();
+        }
         ReloadFinishedNotify->OnNotified.AddUObject(this, &USTUWeaponComponent::OnReloadFinished);
     }
 }
