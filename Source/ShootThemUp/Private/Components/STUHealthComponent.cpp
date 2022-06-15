@@ -18,6 +18,8 @@ void USTUHealthComponent::BeginPlay()
 {
     Super::BeginPlay();
 
+    check(MaxHealth > 0);
+
     //в начале игры или спавне персонажа здоровье мах
     SetHealth(MaxHealth);
 

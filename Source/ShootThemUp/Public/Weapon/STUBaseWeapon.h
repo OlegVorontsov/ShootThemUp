@@ -34,6 +34,12 @@ public:
     //функци€ определ€ет возможна ли перезар€дка
     bool CanReload() const;
 
+    //функци€ возвращает данные об иконках оружи€
+    FWeaponUIData GetUIData() const { return UIData; }
+
+    //функци€ возвращает данные о текущем арсенале оружи€
+    FAmmoData GetAmmoData() const { return CurrentAmmo; }
+
 protected:
     //объ€вл€ем скелетал меш дл€ оружи€
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -50,6 +56,10 @@ protected:
     //начальный арсенал оружи€
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     FAmmoData DefaultAmmo{15, 5, false};
+
+    //структура иконок оружи€ из STUCoreTypes
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    FWeaponUIData UIData;
 
     virtual void BeginPlay() override;
 

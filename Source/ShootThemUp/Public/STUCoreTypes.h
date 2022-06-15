@@ -41,6 +41,21 @@ struct FWeaponData
     UAnimMontage* ReloadAnimMontage;
 };
 
+//структура хранящая информацию об оружии - прицел и иконка
+USTRUCT(BlueprintType)
+struct FWeaponUIData
+{
+    GENERATED_USTRUCT_BODY()
+
+    //иконка оружия
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    UTexture2D* MainIcon;
+
+    //иконка прицела оружия
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    UTexture2D* CrossHairIcon;
+};
+
 //делегат оповещающий персонажа о том умер он или нет
 DECLARE_MULTICAST_DELEGATE(FOnDeathSignature);
 

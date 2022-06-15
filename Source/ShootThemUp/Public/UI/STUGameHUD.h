@@ -15,6 +15,13 @@ public:
     //объ€вл€ем переопределение стандартной функции
     virtual void DrawHUD() override;
 
+protected:
+    //объ€вл€ем класс дл€ виджета
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> PlayerHUDWidgetClass;
+
+    virtual void BeginPlay() override;
+
 private:
     void DrawCrossHair();
 };

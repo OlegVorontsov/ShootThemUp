@@ -30,6 +30,12 @@ public:
     //функци€ перезар€дки по нажатой клавише игрока
     void Reload();
 
+    //функци€ возвращает данные об иконках текущего оружи€
+    bool GetCurrentWeaponUIData(FWeaponUIData& UIData) const;
+
+    //функци€ возвращает данные о текущем арсенале оружи€
+    bool GetCurrentAmmoData(FAmmoData& AmmoData) const;
+
 protected:
     //объ€вл€ем массив структур дл€ спавна оружи€
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")

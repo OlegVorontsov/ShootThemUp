@@ -301,3 +301,25 @@ void USTUWeaponComponent::ChangeClip()
     ReloadAnimInProgress = true;
     PlayAnimMontage(CurrentReloadAnimMontage);
 }
+
+//функция возвращает данные об иконках текущего оружия
+bool USTUWeaponComponent::GetCurrentWeaponUIData(FWeaponUIData& UIData) const
+{
+    if (CurrentWeapon)
+    {
+        UIData = CurrentWeapon->GetUIData();
+        return true;
+    }
+    return false;
+}
+
+//функция возвращает данные о текущем арсенале оружия
+bool USTUWeaponComponent::GetCurrentAmmoData(FAmmoData& AmmoData) const
+{
+    if (CurrentWeapon)
+    {
+        AmmoData = CurrentWeapon->GetAmmoData();
+        return true;
+    }
+    return false;
+}

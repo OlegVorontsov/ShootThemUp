@@ -2,13 +2,26 @@
 
 #include "UI/STUGameHUD.h"
 #include "Engine/Canvas.h"
+#include "Blueprint/UserWidget.h"
 
 //переопределяем стандартную функцию
 void ASTUGameHUD::DrawHUD()
 {
     Super::DrawHUD();
 
-    DrawCrossHair();
+    // DrawCrossHair();
+}
+
+void ASTUGameHUD::BeginPlay()
+{
+    Super::BeginPlay();
+
+    //создаем виджет нашего класса и записываем в переменную
+    auto PlayerHUDWidget = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDWidgetClass);
+    if (PlayerHUDWidget)
+    {
+        PlayerHUDWidget->AddToViewport();
+    }
 }
 
 void ASTUGameHUD::DrawCrossHair()

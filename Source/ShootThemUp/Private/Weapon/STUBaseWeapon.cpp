@@ -117,7 +117,8 @@ void ASTUBaseWeapon::DecreaseAmmo()
     }
     //уменьшаем количество патрон
     CurrentAmmo.Bullets--;
-    LogAmmo();
+
+    // LogAmmo();
 
     //проверяем нужна ли перезарядка. магазин пуст и арсенал не пустой
     if (IsClipEmpty() && !IsAmmoEmpty())

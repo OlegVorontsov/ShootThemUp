@@ -24,6 +24,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Health")
     bool IsDead() const { return FMath::IsNearlyZero(Health); }
 
+    //функция возвращает кол-во % оставшегося здоровья
+    UFUNCTION(BlueprintCallable, Category = "Health")
+    float GetHealthPercent() const { return Health / MaxHealth; }
+
     //делегат оповещающий персонажа о том умер он или нет
     FOnDeathSignature OnDeath;
 
