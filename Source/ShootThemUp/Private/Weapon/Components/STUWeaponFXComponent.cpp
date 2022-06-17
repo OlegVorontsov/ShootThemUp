@@ -3,7 +3,7 @@
 #include "Weapon/Components/STUWeaponFXComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
-//#include "PhysicalMaterials/PhysicalMaterial.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/DecalComponent.h"
 
@@ -34,7 +34,7 @@ void USTUWeaponFXComponent::PlayImpactFX(const FHitResult& Hit)
         Hit.ImpactNormal.Rotation());
 
     //вызываем спавн decal
-    auto DecalComponent = UGamePlayStatics::SpawnDecalAtLocation(GetWorld(), //
+    auto DecalComponent = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), //
         ImpactData.DecalData.Material,                                       //
         ImpactData.DecalData.Size,                                           //
         Hit.ImpactPoint,                                                     //
