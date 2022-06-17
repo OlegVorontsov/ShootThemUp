@@ -281,9 +281,25 @@ void USTUWeaponComponent::Reload()
 }
 
 //функция бинда на делегат OnClipEmpty - закончились пастроны в BaseWeapon
-void USTUWeaponComponent::OnEmptyClip()
+void USTUWeaponComponent::OnEmptyClip(ASTUBaseWeapon* AmmoEmptyWeapon)
 {
-    ChangeClip();
+    if (!AmmoEmptyWeapon)
+        return;
+
+    if (CurrentWeapon == AmmoEmptyWeapon)
+    {
+        ChangeClip();
+    }
+    else
+    {
+        for (const auto Weapon : Weapons)
+        {
+            if (Weapon == AmmoEmptyWeapon)
+            {
+                Weapon->ChangeClip();
+            }
+        }
+    }
 }
 
 //функция перезарядки оружия
@@ -320,6 +336,22 @@ bool USTUWeaponComponent::GetCurrentAmmoData(FAmmoData& AmmoData) const
     {
         AmmoData = CurrentWeapon->GetAmmoData();
         return true;
+    }
+    return false;
+}
+
+//функция добавления арсенала через пикап
+bool USTUWeaponComponent::TryToAddAmmo(TSubclassOf<ASTUBaseWeapon> WeaponType, int32 ClipsAmount)
+{
+    //проходимся по массиву оружия
+    for (const auto Weapon : Weapons)
+    {
+        //проверяем на null и нужное ли оружие
+        if (Weapon && Weapon->IsA(WeaponType))
+        {
+            //если нашли передаем в BaseWeapon кол-во магазинов
+            return Weapon->TryToAddAmmo(ClipsAmount);
+        }
     }
     return false;
 }

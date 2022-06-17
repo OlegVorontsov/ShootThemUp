@@ -48,7 +48,7 @@ void USTUHealthComponent::HealUpdate()
 
     //останавливаем таймер если здоровье достигло max уровня
     //числа float проверяем с помощью функции IsNearlyEqual
-    if (FMath::IsNearlyEqual(Health, MaxHealth) && GetWorld())
+    if (IsHealthFull() && GetWorld())
     {
         GetWorld()->GetTimerManager().ClearTimer(HealTimerHandle);
     }
@@ -82,4 +82,22 @@ void USTUHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, co
         GetWorld()->GetTimerManager().SetTimer(
             HealTimerHandle, this, &USTUHealthComponent::HealUpdate, HealUpdateTime, true, HealDelay);
     }
+}
+
+//функция вернет true когда здоровье max
+bool USTUHealthComponent::IsHealthFull() const
+{
+    return FMath::IsNearlyEqual(Health, MaxHealth);
+}
+
+//функция добавления здоровья через пикап
+bool USTUHealthComponent::TryToAddHealth(float HealthAmount)
+{
+    //условие выхода из функции: персонаж мертв или здоровье max или кол-во добав. здоровья отриц.
+    if (IsDead() || IsHealthFull() || HealthAmount <= 0)
+        return false;
+
+    SetHealth(Health + HealthAmount);
+
+    return true;
 }

@@ -127,7 +127,7 @@ void ASTUBaseWeapon::DecreaseAmmo()
         StopFire();
 
         //подписываемся на делегат
-        OnClipEmpty.Broadcast();
+        OnClipEmpty.Broadcast(this);
     }
 }
 
@@ -181,4 +181,53 @@ void ASTUBaseWeapon::LogAmmo()
     AmmoInfo += CurrentAmmo.Infinite ? "Infinite" : FString::FromInt(CurrentAmmo.CLips);
 
     UE_LOG(LogBaseWeapon, Display, TEXT("%s"), *AmmoInfo);
+}
+
+//функция вернет true когда арсенал полон
+bool ASTUBaseWeapon::IsAmmoFull() const
+{
+    return CurrentAmmo.CLips == DefaultAmmo.CLips && //
+           CurrentAmmo.Bullets == DefaultAmmo.Bullets;
+}
+
+//функция добавления арсенала через пикап
+bool ASTUBaseWeapon::TryToAddAmmo(int32 ClipsAmount)
+{
+    //условие выхода из функции: арсенал бесконечен или арсенал полон или кол-во магазинов отриц.
+    if (CurrentAmmo.Infinite || IsAmmoFull() || ClipsAmount <= 0)
+        return false;
+
+    //если арсенал пуст
+    if (IsAmmoEmpty())
+    {
+        UE_LOG(LogBaseWeapon, Display, TEXT("Ammo was empty!"));
+
+        CurrentAmmo.CLips = FMath::Clamp(ClipsAmount, 0, DefaultAmmo.CLips + 1);
+        //подписываемся на делегат
+        OnClipEmpty.Broadcast(this);
+    }
+    else if (CurrentAmmo.CLips < DefaultAmmo.CLips)
+    {
+        const auto NextClipsAmount = CurrentAmmo.CLips + ClipsAmount;
+        if (DefaultAmmo.CLips - NextClipsAmount >= 0)
+        {
+            CurrentAmmo.CLips = NextClipsAmount;
+
+            UE_LOG(LogBaseWeapon, Display, TEXT("Clips were added!"));
+        }
+        else
+        {
+            CurrentAmmo.CLips = DefaultAmmo.CLips;
+            CurrentAmmo.Bullets = DefaultAmmo.Bullets;
+
+            UE_LOG(LogBaseWeapon, Display, TEXT("Ammo is full now!"));
+        }
+    }
+    else
+    {
+        CurrentAmmo.Bullets = DefaultAmmo.Bullets;
+
+        UE_LOG(LogBaseWeapon, Display, TEXT("Bullets were added!"));
+    }
+    return true;
 }

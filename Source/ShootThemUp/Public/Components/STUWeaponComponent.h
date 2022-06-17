@@ -36,6 +36,9 @@ public:
     //функция возвращает данные о текущем арсенале оружия
     bool GetCurrentAmmoData(FAmmoData& AmmoData) const;
 
+    //функция добавления арсенала через пикап
+    bool TryToAddAmmo(TSubclassOf<ASTUBaseWeapon> WeaponType, int32 ClipsAmount);
+
 protected:
     //объявляем массив структур для спавна оружия
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
@@ -107,7 +110,7 @@ private:
     bool CanReload() const;
 
     //функция бинда на делегат OnClipEmpty
-    void OnEmptyClip();
+    void OnEmptyClip(ASTUBaseWeapon* AmmoEmptyWeapon);
 
     //функция перезарядки оружия
     void ChangeClip();

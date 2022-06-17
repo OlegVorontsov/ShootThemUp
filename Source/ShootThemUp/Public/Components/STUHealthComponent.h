@@ -34,6 +34,12 @@ public:
     //делегат оповещающий персонажа о том что уменьшились жизни
     FOnHealthChangedSignature OnHealthChanged;
 
+    //функция добавления здоровья через пикап
+    bool TryToAddHealth(float HealthAmount);
+
+    //функция вернет true когда здоровье max
+    bool IsHealthFull() const;
+
 protected:
     virtual void BeginPlay() override;
 

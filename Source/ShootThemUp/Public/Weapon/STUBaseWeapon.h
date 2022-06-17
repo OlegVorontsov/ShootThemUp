@@ -40,6 +40,9 @@ public:
     //функция возвращает данные о текущем арсенале оружия
     FAmmoData GetAmmoData() const { return CurrentAmmo; }
 
+    //функция добавления арсенала через пикап
+    bool TryToAddAmmo(int32 ClipsAmount);
+
 protected:
     //объявляем скелетал меш для оружия
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -89,6 +92,9 @@ protected:
 
     //функция вернет true когда магазин пуст
     bool IsClipEmpty() const;
+
+    //функция вернет true когда арсенал полон
+    bool IsAmmoFull() const;
 
     //функция выведения информации об арсенале
     void LogAmmo();
