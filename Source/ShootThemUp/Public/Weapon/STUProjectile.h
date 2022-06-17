@@ -8,6 +8,7 @@
 
 class USphereComponent;
 class UProjectileMovementComponent;
+class USTUWeaponFXComponent;
 
 UCLASS()
 class SHOOTTHEMUP_API ASTUProjectile : public AActor
@@ -27,6 +28,10 @@ protected:
     //объ€вл€ем компонент движени€ снар€да
     UPROPERTY(VisibleAnywhere, Category = "Weapon")
     UProjectileMovementComponent* MovementComponent;
+
+    //переменна€ визуального эффекта
+    UPROPERTY(VisibleAnywhere, Category = "VFX")
+    USTUWeaponFXComponent* WeaponFXComponent;
 
     //объ€вл€ем переменную радиуса поражени€
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")

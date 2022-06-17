@@ -102,6 +102,9 @@ void ASTUBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, c
     //указываем чтобы игнорировались пересечения с самим собой
     CollisionParams.AddIgnoredActor(GetOwner());
 
+    //указываем что хоти получать материал куда попали
+    CollisionParams.bReturnPhysicalMaterial = true;
+
     //вызываем функцию пересечения с первым попавшимся объектом на сцене
     GetWorld()->LineTraceSingleByChannel(
         HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionParams);

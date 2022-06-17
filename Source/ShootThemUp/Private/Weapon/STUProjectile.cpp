@@ -5,6 +5,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "Weapon/Components/STUWeaponFXComponent.h"
 
 ASTUProjectile::ASTUProjectile()
 {
@@ -17,6 +18,9 @@ ASTUProjectile::ASTUProjectile()
     SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
     SphereComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 
+    //указываем что хотиv получать материал куда попали
+    SphereComponent->bReturnMaterialOnMove = true;
+
     SetRootComponent(SphereComponent);
 
     //создаем компонет движения снаряда
@@ -25,6 +29,9 @@ ASTUProjectile::ASTUProjectile()
     MovementComponent->InitialSpeed = 2000.0f;
     //отключаем притяжение к земле чтобы ракета летела по прямой
     MovementComponent->ProjectileGravityScale = 0.0f;
+
+    //создаем компонент визуального эффекта
+    WeaponFXComponent = CreateDefaultSubobject<USTUWeaponFXComponent>(TEXT("WeaponFXComponent"));
 }
 
 void ASTUProjectile::BeginPlay()
@@ -32,6 +39,7 @@ void ASTUProjectile::BeginPlay()
     Super::BeginPlay();
     check(MovementComponent);
     check(SphereComponent);
+    check(WeaponFXComponent);
 
     //задаем скорость движения умножением направления движения на начальную скорость
     MovementComponent->Velocity = ShotDirection * MovementComponent->InitialSpeed;
@@ -70,6 +78,9 @@ void ASTUProjectile::OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* 
 
     //каждый тик рисуем сферу
     DrawDebugSphere(GetWorld(), GetActorLocation(), DamageRadius, 24, FColor::Red, false, 5.0f);
+
+    //вызываем визуальный эффект
+    WeaponFXComponent->PlayImpactFX(Hit);
 
     //уничтожаем ракету
     Destroy();

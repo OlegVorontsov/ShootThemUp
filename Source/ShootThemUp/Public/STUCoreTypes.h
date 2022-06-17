@@ -61,3 +61,44 @@ DECLARE_MULTICAST_DELEGATE(FOnDeathSignature);
 
 //делегат вызываетс€ когда мен€ютс€ жизни персонажа
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float);
+
+// VFX
+
+class UNiagaraSystem;
+
+//структура хран€ща€ информацию об следах от ппопадпни€ пуль
+USTRUCT(BlueprintType)
+struct FDecalData
+{
+    GENERATED_USTRUCT_BODY()
+
+    //материал
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    UMaterialInterface* Material;
+
+    //размер бокса где будет генеритьс€ изображени€ отпечатка от пули
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    FVector Size = FVector(10.0f);
+
+    //врем€ "жизни"
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    float LifeTime = 5.0f;
+
+    //врем€ угасани€
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    float FadeOutTime = 0.7f;
+};
+
+USTRUCT(BlueprintType)
+struct FImpactData
+{
+    GENERATED_USTRUCT_BODY()
+
+    //указатель на niagara system
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    UNiagaraSystem* NiagaraEffect;
+
+    //структура хран€ща€ информацию об следах от ппопадпни€ пуль
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    FDecalData DecalData;
+};
