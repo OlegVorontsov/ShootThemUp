@@ -55,4 +55,7 @@ void ASTULauncherWeapon::MakeShot()
     }
     //уменьшаем количество патрон в BaseWeapon
     DecreaseAmmo();
+
+    //спавн ээфекта выстрела из BaseWeapon
+    SpawnMuzzleFX();
 }

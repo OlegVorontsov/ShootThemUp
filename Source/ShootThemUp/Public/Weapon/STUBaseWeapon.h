@@ -11,6 +11,8 @@
 
 //форвард декларэтион
 class USkeletalMeshComponent;
+class UNiagaraSystem;
+class UNiagaraComponent;
 
 UCLASS()
 class SHOOTTHEMUP_API ASTUBaseWeapon : public AActor
@@ -64,6 +66,10 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     FWeaponUIData UIData;
 
+    //ээфект вспушки из дула
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+        UNiagaraSystem* MuzzleFX;
+
     virtual void BeginPlay() override;
 
     //виртуальная функция выстрела для имитации выпущения одной пули
@@ -98,6 +104,9 @@ protected:
 
     //функция выведения информации об арсенале
     void LogAmmo();
+
+    //функция спавна компонента эффекта вспышки из дула
+    UNiagaraComponent* SpawnMuzzleFX();
 
 private:
     //текущий арсенал оружия

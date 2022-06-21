@@ -7,6 +7,8 @@
 #include "STURifleWeapon.generated.h"
 
 class USTUWeaponFXComponent;
+class UNiagaraSystem;
+class UNiagaraComponent;
 
 UCLASS()
 class SHOOTTHEMUP_API ASTURifleWeapon : public ASTUBaseWeapon
@@ -33,9 +35,17 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     float DamageAmount = 10.0f;
 
-    //переменная визуального эффекта
+    //переменная визуального эффекта выстрела
     UPROPERTY(VisibleAnywhere, Category = "VFX")
     USTUWeaponFXComponent* WeaponFXComponent;
+
+    //переменная трейса пули
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    UNiagaraSystem* TraceFX;
+
+    //переменная конечной точки эффекта
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    FString TraceTargetName = "TraceTarget";
 
     virtual void BeginPlay() override;
 
@@ -49,6 +59,19 @@ private:
     //объявляем таймер
     FTimerHandle ShotTimerHandle;
 
+    //переменная для указателя на эфект вспышки из дула
+    UPROPERTY()
+    UNiagaraComponent* MuzzleFXComponent;
+
     //функция нанесения ущерба
     void MakeDamage(FHitResult& HitResult);
+
+    //функция спавна эффета
+    void InitMuzzleFX();
+
+    //вкл видимости
+    void SetMuzzleFXVisibility(bool Visible);
+
+    //функция спавна трейса пули
+    void SpawnTraceFX(const FVector& TraceStart, const FVector& TraceEnd);
 };

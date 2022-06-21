@@ -77,7 +77,7 @@ void ASTUProjectile::OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* 
         DoFullDamage);
 
     //каждый тик рисуем сферу
-    DrawDebugSphere(GetWorld(), GetActorLocation(), DamageRadius, 24, FColor::Red, false, 5.0f);
+    // DrawDebugSphere(GetWorld(), GetActorLocation(), DamageRadius, 24, FColor::Red, false, 5.0f);
 
     //вызываем визуальный эффект
     WeaponFXComponent->PlayImpactFX(Hit);

@@ -4,6 +4,8 @@
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
 #include "Weapon/Components/STUWeaponFXComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 ASTURifleWeapon::ASTURifleWeapon()
 {
@@ -23,6 +25,9 @@ void ASTURifleWeapon::StartFire()
 {
     // UE_LOG(LogBaseWeapon, Display, TEXT("Fire!"));
 
+    //вызываем функция спавна эффекта
+    InitMuzzleFX();
+
     //вызываем таймер по истечении которого опять вызовется MakeShot()
     GetWorldTimerManager().SetTimer(ShotTimerHandle, this, &ASTURifleWeapon::MakeShot, TimeBetweenShots, true);
 
@@ -33,6 +38,9 @@ void ASTURifleWeapon::StopFire()
 {
     //останавливаем таймер
     GetWorldTimerManager().ClearTimer(ShotTimerHandle);
+
+    //отключаем видимость эффекта
+    SetMuzzleFXVisibility(false);
 }
 
 void ASTURifleWeapon::MakeShot()
@@ -60,17 +68,22 @@ void ASTURifleWeapon::MakeShot()
     //вызываем функцию выстрела
     MakeHit(HitResult, TraceStart, TraceEnd);
 
+    FVector TraceFXEnd = TraceEnd;
     //проверяем если пересечение произошло
     if (HitResult.bBlockingHit)
     {
+        //переопределяем конечную точку трейса
+        TraceFXEnd = HitResult.ImpactPoint;
+
         //вызов функции нанесения ущерба
         MakeDamage(HitResult);
 
         //рисуем линию выстрела от места расположения сокета в оружии до точки где произошло пересечение
-        //DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), HitResult.ImpactPoint, FColor::Red, false, 3.0f, 0, 3.0f);
+        // DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), HitResult.ImpactPoint, FColor::Red, false, 3.0f,
+        // 0, 3.0f);
 
         //нарисуем сферу в точке пересечения
-        //DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 24, FColor::Red, false, 5.0f);
+        // DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 24, FColor::Red, false, 5.0f);
 
         //выводим в консоль название кости с которой пересеклись
         // UE_LOG(LogBaseWeapon, Display, TEXT("Bone: %s"), *HitResult.BoneName.ToString());
@@ -78,11 +91,9 @@ void ASTURifleWeapon::MakeShot()
         //вызываем визуальный эффект
         WeaponFXComponent->PlayImpactFX(HitResult);
     }
-    else
-    {
-        //рисуем линию выстрела от места расположения сокета в оружии на расстояние TraceMaxDistance
-        DrawDebugLine(GetWorld(), GetMuzzleWorldLocation(), TraceEnd, FColor::Red, false, 3.0f, 0, 3.0f);
-    }
+    //вызываем функцию спавна трейса
+    SpawnTraceFX(GetMuzzleWorldLocation(), TraceFXEnd);
+
     //уменьшаем количество патрон в BaseWeapon
     DecreaseAmmo();
 }
@@ -123,4 +134,35 @@ void ASTURifleWeapon::MakeDamage(FHitResult& HitResult)
     if (!DamagedActor)
         return;
     DamagedActor->TakeDamage(DamageAmount, FDamageEvent(), GetPlayerController(), this);
+}
+
+//функция спавна эффета
+void ASTURifleWeapon::InitMuzzleFX()
+{
+    if (!MuzzleFXComponent)
+    {
+        MuzzleFXComponent = SpawnMuzzleFX();
+    }
+    SetMuzzleFXVisibility(true);
+}
+
+//вкл видимости
+void ASTURifleWeapon::SetMuzzleFXVisibility(bool Visible)
+{
+    if (MuzzleFXComponent)
+    {
+        MuzzleFXComponent->SetPaused(!Visible);
+        MuzzleFXComponent->SetVisibility(Visible, true);
+    }
+}
+
+//функция спавна трейса пули
+void ASTURifleWeapon::SpawnTraceFX(const FVector& TraceStart, const FVector& TraceEnd)
+{
+    //создаем переменную компонента
+    const auto TraceFXComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), TraceFX, TraceStart);
+    if (TraceFXComponent)
+    {
+        TraceFXComponent->SetNiagaraVariableVec3(TraceTargetName, TraceEnd);
+    }
 }
