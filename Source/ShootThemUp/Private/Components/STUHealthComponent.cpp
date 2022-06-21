@@ -2,8 +2,11 @@
 
 #include "Components/STUHealthComponent.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/Controller.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "Camera/CameraShakeBase.h"
 
 //создаем собственную категорию логирования
 DEFINE_LOG_CATEGORY_STATIC(HealthComponentLog, All, All);
@@ -36,9 +39,12 @@ void USTUHealthComponent::BeginPlay()
 //функция установки здоровья персонажу
 void USTUHealthComponent::SetHealth(float NewHealth)
 {
-    Health = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
-    //изменяем здоровье в персонаже через делегат
-    OnHealthChanged.Broadcast(Health);
+    const auto NextHealth = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
+    const auto HealthDelta = NextHealth - Health;
+
+    Health = NextHealth;
+    //изменяем здоровье в персонаже через делегат в CoreTypes
+    OnHealthChanged.Broadcast(Health, HealthDelta);
 }
 
 //функция восстановления здоровья
@@ -82,6 +88,7 @@ void USTUHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, co
         GetWorld()->GetTimerManager().SetTimer(
             HealTimerHandle, this, &USTUHealthComponent::HealUpdate, HealUpdateTime, true, HealDelay);
     }
+    PlayCameraShake();
 }
 
 //функция вернет true когда здоровье max
@@ -100,4 +107,22 @@ bool USTUHealthComponent::TryToAddHealth(float HealthAmount)
     SetHealth(Health + HealthAmount);
 
     return true;
+}
+
+void USTUHealthComponent::PlayCameraShake()
+{
+    if (IsDead())
+        return;
+
+    //получаем указатель на персонаж
+    const auto Player = Cast<APawn>(GetOwner());
+    if (!Player)
+        return;
+
+    //получаем указатель на контроллер
+    const auto Controller = Player->GetController<APlayerController>();
+    if (!Controller || !Controller->PlayerCameraManager)
+        return;
+
+    Controller->PlayerCameraManager->StartCameraShake(CameraShake);
 }

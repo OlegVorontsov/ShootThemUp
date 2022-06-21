@@ -32,4 +32,15 @@ public:
     //функция возвращает в режиме спектаитинга или нет
     UFUNCTION(BlueprintCallable, Category = "UI")
     bool IsPlayerSpectating() const;
+
+    //функция запустит анимацию в блюпринте
+    UFUNCTION(BlueprintImplementableEvent, Category = "UI")
+    void OnTakeDamage();
+
+    //функция подписания на делегат
+    virtual bool Initialize() override;
+
+private:
+    //функция для биндинга
+    void OnHealthChanged(float Health, float HealthDelta);
 };

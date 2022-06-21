@@ -11,7 +11,8 @@ class UCameraComponent;
 class USpringArmComponent;
 class USTUHealthComponent;
 class UTextRenderComponent;
-class USTUWeaponComponent;;
+class USTUWeaponComponent;
+;
 
 UCLASS()
 class SHOOTTHEMUP_API ASTUBaseCharacter : public ACharacter
@@ -94,7 +95,7 @@ private:
     void OnDeath();
 
     //функция изменения жизней персонажа
-    void OnHealthChanged(float Health);
+    void OnHealthChanged(float Health, float HealthDelta);
 
     //функция падения на землю
     UFUNCTION()

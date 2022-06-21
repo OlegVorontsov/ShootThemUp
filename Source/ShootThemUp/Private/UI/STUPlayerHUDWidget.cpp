@@ -5,6 +5,30 @@
 #include "Components/STUWeaponComponent.h"
 #include "STUUtils.h"
 
+//функция подписания на делегат
+bool USTUPlayerHUDWidget::Initialize()
+{
+    //получаем указатель на STUHealthComponent с помощью шаблонной функции из STUUtils
+    const auto HealthComponent = STUUtils::GetSTUPlayerComponent<USTUHealthComponent>(GetOwningPlayerPawn());
+
+    if (HealthComponent)
+    {
+        //биндимся на делегат в HealthComponent и вызываем нашу функцию
+        HealthComponent->OnHealthChanged.AddUObject(this, &USTUPlayerHUDWidget::OnHealthChanged);
+    }
+
+    return Super::Initialize();
+}
+
+//функция для биндинга
+void USTUPlayerHUDWidget::OnHealthChanged(float Health, float HealthDelta)
+{
+    if (HealthDelta < 0.0f)
+    {
+        OnTakeDamage();
+    }
+}
+
 //функция возвращает кол-во % оставшегося здоровья
 float USTUPlayerHUDWidget::GetHealthPercent() const
 {

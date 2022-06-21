@@ -59,8 +59,8 @@ struct FWeaponUIData
 //делегат оповещающий персонажа о том умер он или нет
 DECLARE_MULTICAST_DELEGATE(FOnDeathSignature);
 
-//делегат вызывается когда меняются жизни персонажа
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float);
+//делегат вызывается когда меняется здоровье персонажа
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedSignature, float, float);
 
 // VFX
 

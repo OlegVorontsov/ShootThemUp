@@ -57,8 +57,9 @@ void ASTUBaseCharacter::BeginPlay()
     check(HealthComponent);
     check(HealthTextComponent);
     check(GetCharacterMovement());
+    check(GetMesh());
 
-    OnHealthChanged(HealthComponent->GetHealth());
+    OnHealthChanged(HealthComponent->GetHealth(), 0.0f);
 
     //подписываемс€ на делегат из HealthComponent и вызываем функцию OnDeath персонажа
     HealthComponent->OnDeath.AddUObject(this, &ASTUBaseCharacter::OnDeath);
@@ -80,7 +81,7 @@ void ASTUBaseCharacter::OnDeath()
 {
     UE_LOG(BaseCharacterLog, Display, TEXT("Player %s is dead"), *GetName());
     //проигрываем анимацию смерти персонажа
-    PlayAnimMontage(DeathAnimMontage);
+    // PlayAnimMontage(DeathAnimMontage);
 
     //останавливаем движение персонажа после его смерти
     GetCharacterMovement()->DisableMovement();
@@ -99,10 +100,14 @@ void ASTUBaseCharacter::OnDeath()
 
     //останавливаем стрельбу
     WeaponComponent->StopFire();
+
+    //делаем mesh персонажа тр€пичной куклой
+    GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    GetMesh()->SetSimulatePhysics(true);
 }
 
 //функци€ изменени€ здоровь€ персонажа
-void ASTUBaseCharacter::OnHealthChanged(float Health)
+void ASTUBaseCharacter::OnHealthChanged(float Health, float HealthDelta)
 {
     //передаем в HealthTextComponent значение из локальтной переменной с указанной точностью
     HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
